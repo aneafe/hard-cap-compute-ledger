@@ -60,6 +60,15 @@ The protocol separates low-level hardware telemetry collection from high-integri
 * **Month 6:** Release `v0.1` open-source package with deployment guides for third-party auditors and governance researchers.
 
 ---
+## Ingestion Security & Cryptographic Gatekeeping
+
+To prevent queue poisoning and spoofed telemetry, the Python FastAPI ingestion layer acts as a stateless cryptographic gatekeeper **before** writing any data to Redis:
+
+1. **Freshness & Replay Protection:** Validates `X-Timestamp` within a strict ±30-second drift window and enforces single-use `X-Nonce` tracking.
+2. **Hardware Identity Binding:** Resolves `X-Node-ID` against registered public keys bound to hardware TPM / GPU attestation certificates.
+3. **Deterministic Canonical Hashing:** Computes a `SHA-256` digest over `timestamp + nonce + canonical_json` so payload formatting cannot be manipulated.
+4. **Pre-Queue `Ed25519` Verification:** Verifies `X-Signature` in memory; unauthenticated or tampered packets fail immediately (`401`/`403`) without touching Redis memory.
+5. **Verified Stream Handoff:** Only cryptographically verified envelopes—preserving the original signature and `payload_hash`—are appended to the `telemetry:verified` Redis Stream for downstream Laravel Merkle-tree anchoring.
 
 ## License
 
