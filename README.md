@@ -8,9 +8,15 @@
 
 ## Overview
 
-Effective compute governance requires verifiable, tamper-evident records of hardware utilization without exposing proprietary model weights or sensitive training data. 
+Effective compute governance requires verifiable, tamper-evident records of hardware utilization without exposing proprietary model weights, gradients or sensitive training datasets. 
 
 **Hard-Cap Compute Ledger** provides a normalized relational schema, a stateless cryptographic ingestion gatekeeper, a Redis Stream buffer, and a per-run Merkle hash chain designed for **independent compute auditors**, **third-party evaluation organizations**, and **regulatory sandboxes**.
+
+### Key Components
+1. **Python Telemetry Ingestion Layer:** Lightweight endpoints that validate cryptographic hardware signatures (e.g., GPU/TPM attestations) before queuing telemetry events.
+2. **Redis High-Throughput Buffer:** Decouples bursty cluster telemetry streams from persistent storage to prevent dropped packets during peak training runs.
+3. **Laravel Verification & RBAC Engine:** Manages role-based access control, relational data mapping, and automated discrepancy flagging.
+4. **Immutable Audit Storage (MySQL + Merkle Hashing):** Stores normalized `hardware_nodes` and `audit_logs` records linked via Merkle-style cryptographic hashes so historical compute logs cannot be silently altered or deleted.
 
 ---
 
